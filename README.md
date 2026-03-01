@@ -1,15 +1,15 @@
 # WA Gear Notification API
 
-API serverless untuk mengirim pesan WhatsApp melalui WA Gear Chrome Extension.
+Serverless API for sending WhatsApp messages through the WA Gear Chrome Extension.
 
-## 🚀 Deploy (1-Klik)
+## 🚀 Deploy (1-Click)
 
 [![Deploy to Netlify](https://www.netlify.com/img/deploy/button.svg)](https://app.netlify.com/start/deploy?repository=https://github.com/danukidd/wagear-notification-api)
 
 ## ⚙️ Setup
 
-### 1. Deploy ke Netlify
-Klik tombol **Deploy to Netlify** di atas, atau deploy manual:
+### 1. Deploy to Netlify
+Click the **Deploy to Netlify** button above, or deploy manually:
 ```bash
 npm install
 netlify init
@@ -17,37 +17,37 @@ netlify deploy --prod
 ```
 
 ### 2. Set API Key
-Di Netlify Dashboard → **Site Settings** → **Environment Variables**, tambahkan:
+In Netlify Dashboard → **Site Settings** → **Environment Variables**, add:
 
 | Key | Value |
 |-----|-------|
-| `DSCE_API_KEY` | API key pilihan Anda (contoh: `wg-notif-abc123xyz`) |
+| `DSCE_API_KEY` | Your chosen API key (e.g. `wg-notif-abc123xyz`) |
 
-> ⚠️ Setelah set env variable, re-deploy: `netlify deploy --prod`
+> ⚠️ After setting the env variable, re-deploy: `netlify deploy --prod`
 
-### 3. Konfigurasi Extension
-Buka **WA Gear Side Panel** → **Netlify Notification API**:
+### 3. Configure the Extension
+Open **WA Gear Side Panel** → **Netlify Notification API**:
 - Enable notification polling
-- Masukkan **API URL**: `https://nama-site-anda.netlify.app`
-- Masukkan **API Key**: sama dengan `DSCE_API_KEY`
-- Klik **Test Connection** untuk verifikasi
+- Enter **API URL**: `https://your-site-name.netlify.app`
+- Enter **API Key**: same as `DSCE_API_KEY`
+- Click **Test Connection** to verify
 
 ## 📡 API Endpoints
 
-### Kirim Pesan
+### Send Message
 ```
 POST /.netlify/functions/send
 ```
 **Headers:**
 ```
 Content-Type: application/json
-x-api-key: api-key-anda
+x-api-key: your-api-key
 ```
 **Body:**
 ```json
 {
   "to": "628xxxxxxxxxx",
-  "message": "Halo dari API!",
+  "message": "Hello from the API!",
   "type": "text"
 }
 ```
@@ -60,13 +60,13 @@ x-api-key: api-key-anda
 }
 ```
 
-### Cek Pending
+### Check Pending
 ```
 GET /.netlify/functions/pending
-Headers: x-api-key: api-key-anda
+Headers: x-api-key: your-api-key
 ```
 
-### Konfirmasi Terkirim
+### Acknowledge Sent
 ```
 POST /.netlify/functions/ack
 Body: { "id": "msg-uuid", "status": "sent" }
@@ -75,15 +75,15 @@ Body: { "id": "msg-uuid", "status": "sent" }
 ## 🧪 Test via cURL
 
 ```bash
-# Kirim pesan
-curl -X POST https://nama-site.netlify.app/.netlify/functions/send \
+# Send a message
+curl -X POST https://your-site-name.netlify.app/.netlify/functions/send \
   -H "Content-Type: application/json" \
-  -H "x-api-key: api-key-anda" \
-  -d '{"to": "628xxxxxxxxxx", "message": "Test dari API!"}'
+  -H "x-api-key: your-api-key" \
+  -d '{"to": "628xxxxxxxxxx", "message": "Test from the API!"}'
 ```
 
-## 📋 Catatan
-- Polling interval: 30 detik
-- WhatsApp Web harus terbuka & extension aktif
-- Pesan terkirim otomatis dalam 0-30 detik setelah masuk queue
-- Free tier Netlify: 125K function invocations/bulan
+## 📋 Notes
+- Polling interval: 30 seconds
+- WhatsApp Web must be open & the extension must be active
+- Messages are sent automatically within 0–30 seconds after entering the queue
+- Netlify free tier: 125K function invocations/month
