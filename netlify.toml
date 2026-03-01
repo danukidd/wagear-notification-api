@@ -1,0 +1,16 @@
+[build]
+  functions = "netlify/functions"
+  publish = "public"
+
+[functions]
+  node_bundler = "esbuild"
+
+[[headers]]
+  for = "/.netlify/functions/*"
+  [headers.values]
+    Access-Control-Allow-Origin = "*"
+    Access-Control-Allow-Headers = "Content-Type, x-api-key"
+    Access-Control-Allow-Methods = "GET, POST, OPTIONS"
+
+[template.environment]
+  DSCE_API_KEY = "change-me-to-your-secret-key"
