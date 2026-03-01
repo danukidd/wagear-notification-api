@@ -58,7 +58,7 @@ export default async (req, context) => {
             );
         }
 
-        msg.status = body.status; // "sent" or "failed"
+        msg.status = body.status; // "inprogress", "sent", or "failed"
         msg.updatedAt = new Date().toISOString();
         if (body.error) msg.error = body.error;
         await store.setJSON(body.id, msg);
