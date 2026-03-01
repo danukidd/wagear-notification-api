@@ -1,10 +1,10 @@
-# Digisender Notification API
+# WA Gear Notification API
 
 API serverless untuk mengirim pesan WhatsApp melalui WA Gear Chrome Extension.
 
 ## 🚀 Deploy (1-Klik)
 
-[![Deploy to Netlify](https://www.netlify.com/img/deploy/button.svg)](https://app.netlify.com/start/deploy?repository=https://github.com/nicedanuk/digisender-notification-api)
+[![Deploy to Netlify](https://www.netlify.com/img/deploy/button.svg)](https://app.netlify.com/start/deploy?repository=https://github.com/danukidd/wagear-notification-api)
 
 ## ⚙️ Setup
 
