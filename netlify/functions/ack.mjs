@@ -63,17 +63,6 @@ export default async (req, context) => {
         if (body.error) msg.error = body.error;
         await store.setJSON(body.id, msg);
 
-        // Remove from pending index
-        try {
-            let index = await store.get("_pending_index", { type: "json" });
-            if (index) {
-                index = index.filter((id) => id !== body.id);
-                await store.setJSON("_pending_index", index);
-            }
-        } catch (e) {
-            // Index issue, not critical
-        }
-
         return new Response(
             JSON.stringify({ success: true, message: "Message acknowledged" }),
             { status: 200, headers: corsHeaders() }

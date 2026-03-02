@@ -40,42 +40,27 @@ export default async (req, context) => {
     try {
         const store = getStore("notification-queue");
 
-        // Get the pending index
-        let index = [];
-        try {
-            const existingIndex = await store.get("_pending_index", { type: "json" });
-            if (existingIndex) index = existingIndex;
-        } catch (e) {
-            // No pending index
-        }
-
-        if (index.length === 0) {
-            return new Response(
-                JSON.stringify({ success: true, messages: [] }),
-                { status: 200, headers: corsHeaders() }
-            );
-        }
-
-        // Fetch all pending messages
+        // List ALL blobs and filter for pending status
+        // This avoids relying on the _pending_index which has race condition issues
+        const { blobs } = await store.list();
         const messages = [];
-        const validIndex = [];
 
-        for (const msgId of index) {
+        for (const blob of blobs) {
+            // Skip the index key
+            if (blob.key === "_pending_index") continue;
+
             try {
-                const msg = await store.get(msgId, { type: "json" });
+                const msg = await store.get(blob.key, { type: "json" });
                 if (msg && msg.status === "pending") {
                     messages.push(msg);
-                    validIndex.push(msgId);
                 }
             } catch (e) {
-                // Message was deleted or doesn't exist, skip
+                // Message was deleted or corrupted, skip
             }
         }
 
-        // Clean up index if needed
-        if (validIndex.length !== index.length) {
-            await store.setJSON("_pending_index", validIndex);
-        }
+        // Sort by creation date (oldest first)
+        messages.sort((a, b) => new Date(a.createdAt) - new Date(b.createdAt));
 
         return new Response(
             JSON.stringify({ success: true, messages }),

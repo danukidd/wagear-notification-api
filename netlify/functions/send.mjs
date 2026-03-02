@@ -51,7 +51,7 @@ export default async (req, context) => {
 
         // Normalize phone number (remove +, spaces, dashes)
         let phone = body.to.toString().replace(/[\s\-\+]/g, "");
-        if (!phone.endsWith("@c.us")) {
+        if (!phone.includes("@c.us") && !phone.includes("@g.us")) {
             phone = `${phone}@c.us`;
         }
 
@@ -68,17 +68,6 @@ export default async (req, context) => {
         // Store in Netlify Blobs
         const store = getStore("notification-queue");
         await store.setJSON(msgId, message);
-
-        // Also maintain an index of pending message IDs for quick retrieval
-        let index = [];
-        try {
-            const existingIndex = await store.get("_pending_index", { type: "json" });
-            if (existingIndex) index = existingIndex;
-        } catch (e) {
-            // Index doesn't exist yet
-        }
-        index.push(msgId);
-        await store.setJSON("_pending_index", index);
 
         return new Response(
             JSON.stringify({
