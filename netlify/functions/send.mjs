@@ -42,9 +42,25 @@ export default async (req, context) => {
         const body = await req.json();
 
         // Validate required fields
-        if (!body.to || !body.message) {
+        if (!body.to) {
             return new Response(
-                JSON.stringify({ error: "Missing required fields: 'to' and 'message'" }),
+                JSON.stringify({ error: "Missing required field: 'to'" }),
+                { status: 400, headers: corsHeaders() }
+            );
+        }
+
+        const msgType = body.type || "text";
+
+        if (msgType === "text" && !body.message) {
+            return new Response(
+                JSON.stringify({ error: "Missing required field: 'message' for text type" }),
+                { status: 400, headers: corsHeaders() }
+            );
+        }
+
+        if (msgType === "file" && !body.url) {
+            return new Response(
+                JSON.stringify({ error: "Missing required field: 'url' for file type" }),
                 { status: 400, headers: corsHeaders() }
             );
         }
@@ -59,8 +75,11 @@ export default async (req, context) => {
         const message = {
             id: msgId,
             to: phone,
-            message: body.message,
-            type: body.type || "text",
+            type: msgType,
+            message: body.message || "",
+            url: body.url || "",
+            filename: body.filename || "",
+            caption: body.caption || "",
             status: "pending",
             createdAt: new Date().toISOString(),
         };
