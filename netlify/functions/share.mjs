@@ -59,6 +59,8 @@ export default async (req, context) => {
         const shareId = uuidv4();
         const store = getStore("campaign-share");
         const createdItems = [];
+        const totalPartsIncludeSharer = (body.totalParts || body.parts.length + 1); // includes sharer's Part 1
+        const startPartIndex = (body.startPartIndex || 2); // Part 2+ for helpers
 
         for (let i = 0; i < body.parts.length; i++) {
             const part = body.parts[i];
@@ -70,20 +72,23 @@ export default async (req, context) => {
                 );
             }
 
+            const partIdx = startPartIndex + i;
             const itemId = uuidv4();
             const shareItem = {
                 id: itemId,
                 shareId: shareId,
                 sourceNumber: body.sourceNumber,
                 targetNumber: part.targetNumber,
-                partIndex: i + 1,
-                totalParts: body.parts.length,
+                partIndex: partIdx,
+                totalParts: totalPartsIncludeSharer,
                 status: "pending",
                 progress: { sent: 0, total: part.recipients.length },
                 campaign: {
-                    name: `${body.campaign.name} - Part ${i + 1}/${body.parts.length}`,
+                    name: `${body.campaign.name} - Part ${partIdx}/${totalPartsIncludeSharer}`,
                     settings: body.campaign.settings || {},
                     msgs: body.campaign.msgs || [],
+                    whentosend: body.campaign.whentosend || "draft",
+                    scheduledat: body.campaign.scheduledat || "",
                 },
                 recipients: part.recipients,
                 createdAt: new Date().toISOString(),
@@ -93,7 +98,7 @@ export default async (req, context) => {
 
             createdItems.push({
                 id: itemId,
-                partIndex: i + 1,
+                partIndex: partIdx,
                 targetNumber: part.targetNumber,
                 recipientCount: part.recipients.length,
             });
@@ -103,7 +108,7 @@ export default async (req, context) => {
             JSON.stringify({
                 success: true,
                 shareId: shareId,
-                totalParts: body.parts.length,
+                totalParts: totalPartsIncludeSharer,
                 items: createdItems,
                 message: "Campaign shared successfully",
             }),
