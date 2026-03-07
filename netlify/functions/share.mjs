@@ -56,7 +56,7 @@ export default async (req, context) => {
             );
         }
 
-        const shareId = uuidv4();
+        const shareId = body.shareId || uuidv4();
         const store = getStore("campaign-share");
         const createdItems = [];
         const totalPartsIncludeSharer = (body.totalParts || body.parts.length + 1); // includes sharer's Part 1
