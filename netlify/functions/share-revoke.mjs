@@ -40,43 +40,50 @@ export default async (req, context) => {
     try {
         const body = await req.json();
 
-        if (!body.id || !body.status) {
+        if (!body.shareId) {
             return new Response(
-                JSON.stringify({ error: "Missing required fields: 'id' and 'status'" }),
+                JSON.stringify({ error: "Missing required field: 'shareId'" }),
                 { status: 400, headers: corsHeaders() }
             );
         }
 
         const store = getStore("campaign-share");
+        const { blobs } = await store.list();
 
-        const item = await store.get(body.id, { type: "json" });
-        if (!item) {
-            return new Response(
-                JSON.stringify({ error: "Share item not found" }),
-                { status: 404, headers: corsHeaders() }
-            );
+        let reclaimedRecipients = [];
+        let deletedParts = 0;
+
+        for (const blob of blobs) {
+            try {
+                const item = await store.get(blob.key, { type: "json" });
+                if (item && item.shareId === body.shareId) {
+                    // Collect recipients to return back to the sharer
+                    if (item.recipients && Array.isArray(item.recipients)) {
+                        reclaimedRecipients = reclaimedRecipients.concat(item.recipients);
+                    }
+
+                    // Delete the blob
+                    await store.delete(blob.key);
+                    deletedParts++;
+                }
+            } catch (e) {
+                console.error("Error processing blob for revocation", blob.key, e);
+            }
         }
-
-        item.status = body.status; // "imported", "rejected", "pending"
-        item.updatedAt = new Date().toISOString();
-        if (body.error) item.error = body.error;
-
-        if (body.status === "pending") {
-            delete item.campaignStatus;
-            delete item.progress;
-            delete item.error;
-        }
-
-        await store.setJSON(body.id, item);
 
         return new Response(
-            JSON.stringify({ success: true, message: "Share acknowledged" }),
+            JSON.stringify({
+                success: true,
+                message: "Share revoked successfully",
+                deletedParts: deletedParts,
+                recipients: reclaimedRecipients
+            }),
             { status: 200, headers: corsHeaders() }
         );
     } catch (error) {
         return new Response(
-            JSON.stringify({ error: "Failed to acknowledge share", details: error.message }),
-            { status: 400, headers: corsHeaders() }
+            JSON.stringify({ error: "Failed to revoke share", details: error.message }),
+            { status: 500, headers: corsHeaders() }
         );
     }
 };
