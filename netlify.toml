@@ -12,5 +12,13 @@
     Access-Control-Allow-Headers = "Content-Type, x-api-key"
     Access-Control-Allow-Methods = "GET, POST, OPTIONS"
 
+# Incoming Webhook: friendly URL redirect
+# External services POST to: /webhook/[your-source-key]
+[[redirects]]
+  from = "/webhook/:key"
+  to = "/.netlify/functions/webhook?key=:key"
+  status = 200
+  force = true
+
 [template.environment]
   DSCE_API_KEY = "change-me-to-your-secret-key"
