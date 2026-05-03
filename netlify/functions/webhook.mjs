@@ -24,8 +24,22 @@ export default async (req, context) => {
     }
 
     // Get source key from query param (set by netlify.toml redirect)
+    // Fallback: extract from URL path if Netlify rewrite didn't forward query param
+    // e.g. /webhook/lynk → key = "lynk"
+    //      /.netlify/functions/webhook?key=lynk → key = "lynk"
     const url = new URL(req.url);
-    const sourceKey = url.searchParams.get("key");
+    let sourceKey = url.searchParams.get("key");
+    if (!sourceKey) {
+        // Extract from path: last segment after /webhook/
+        const pathMatch = url.pathname.match(/\/webhook\/([^/?#]+)/);
+        if (pathMatch) sourceKey = pathMatch[1];
+        // Also handle direct function path with no query: last path segment
+        if (!sourceKey) {
+            const segments = url.pathname.split("/").filter(Boolean);
+            const last = segments[segments.length - 1];
+            if (last && last !== "webhook") sourceKey = last;
+        }
+    }
 
     if (!sourceKey) {
         return new Response(JSON.stringify({ error: "Missing source key" }), {

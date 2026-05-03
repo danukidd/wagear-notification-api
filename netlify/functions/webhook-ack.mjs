@@ -53,7 +53,7 @@ export default async (req, context) => {
         );
     }
 
-    const validStatuses = ["processed", "failed", "inprogress"];
+    const validStatuses = ["processed", "sent", "failed", "inprogress"];
     if (!validStatuses.includes(status)) {
         return new Response(
             JSON.stringify({ error: `Invalid status. Must be one of: ${validStatuses.join(", ")}` }),
