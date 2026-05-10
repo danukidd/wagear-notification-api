@@ -51,6 +51,9 @@ export default async (req, context) => {
             pendingEvents.push(event);
         }
 
+        // Sort by receivedAt (oldest first) to preserve original order
+        pendingEvents.sort((a, b) => new Date(a.receivedAt) - new Date(b.receivedAt));
+
         return new Response(
             JSON.stringify({ success: true, events: pendingEvents }),
             { status: 200, headers: corsHeaders() }
